@@ -4,39 +4,71 @@ use std::thread::spawn;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug, Clone)]
-pub struct Options {
-    host: String,
-    port: u16,
-    #[structopt(short)]
-    pub listen: bool,
-    #[structopt(short)]
-    upload: bool,
-    #[structopt(short)]
-    command: bool,
-    #[structopt(short)]
-    execute: Option<String>,
-    #[structopt(short = "d")]
-    upload_destination: Option<String>,
+pub enum Options {
+    Connect(ConnectOpts),
+    Listen(ListenOpts),
+    Scan(ScanOpts),
 }
 
-pub fn listen(opt: &Options) {
-    let listener = TcpListener::bind(format!("{}:{}", opt.host, opt.port)).unwrap();
+#[derive(StructOpt, Debug, Clone)]
+pub struct ListenOpts {
+    #[structopt(short, long)]
+    execute: Option<String>,
+    #[structopt(short, long)]
+    keep_open: bool,
+    host: String,
+    port: u16,
+}
+
+#[derive(StructOpt, Debug, Clone)]
+pub struct ConnectOpts {
+    #[structopt(short, long)]
+    execute: Option<String>,
+    #[structopt(short, long)]
+    keep_open: bool,
+    host: String,
+    port: u16,
+}
+
+#[derive(StructOpt, Debug, Clone)]
+pub struct ScanOpts {
+    host: String,
+    port_range: u16,
+}
+
+pub fn listen(opt: &ListenOpts) -> io::Result<()> {
+    if opt.keep_open {
+        listen_concurrently(opt)
+    } else {
+        listen_once(opt)
+    }
+}
+
+pub fn connect(opt: &ConnectOpts) -> io::Result<()> {
+    let addr = format!("{}:{}", opt.host, opt.port);
+    let stream = TcpStream::connect(addr)?;
+
+    tcp_cat(stream)
+}
+
+fn listen_once(opt: &ListenOpts) -> io::Result<()> {
+    let addr = format!("{}:{}", opt.host, opt.port);
+    let listener = TcpListener::bind(addr)?;
+    let (socket, _) = listener.accept()?;
+    tcp_cat(socket)
+}
+
+fn listen_concurrently(opt: &ListenOpts) -> io::Result<()> {
+    let listener = TcpListener::bind(format!("{}:{}", opt.host, opt.port))?;
 
     loop {
         let (socket, _) = listener.accept().unwrap();
 
-        std::thread::spawn(move || connect(socket).unwrap());
+        std::thread::spawn(move || tcp_cat(socket).unwrap());
     }
 }
 
-pub fn client(opt: &Options) -> io::Result<()> {
-    let addr = format!("{}:{}", opt.host, opt.port);
-    let stream = TcpStream::connect(addr)?;
-
-    connect(stream)
-}
-
-pub fn connect(mut stream: TcpStream) -> io::Result<()> {
+fn tcp_cat(mut stream: TcpStream) -> io::Result<()> {
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut rstream = stream.try_clone()?;
