@@ -72,5 +72,7 @@ This is an early-stage project, but it aims to add many of the features of `netc
 * [x] Basic TCP client and server
 * [x] Concurrent listener
 * [x] Pipelining
-* [] UDP
-* [] TLS
+* [ ] Port Scanning
+* [ ] TLS
+* [ ] UDP
+* [ ] Command execution
