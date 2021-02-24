@@ -1,8 +1,8 @@
+use anyhow::Result;
 use netkitten::{connect, listen, Options};
-use std::error::Error;
 use structopt::StructOpt;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let opt = Options::from_args();
 
     match opt {

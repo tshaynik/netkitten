@@ -13,3 +13,4 @@ name = "nk"
 
 [dependencies]
 structopt = "0.3.21"
+anyhow = "1.0.38"
