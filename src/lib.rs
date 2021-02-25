@@ -5,6 +5,7 @@ mod transfer;
 
 pub use connect::connect;
 pub use listen::listen;
+pub use scan::scan;
 
 use connect::ConnectOpts;
 use listen::ListenOpts;

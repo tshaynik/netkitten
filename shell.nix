@@ -3,5 +3,7 @@
 pkgs.mkShell {
   buildInputs = [
     pkgs.rustup
+    pkgs.evcxr
+    pkgs.rust-analyzer
   ];
 }

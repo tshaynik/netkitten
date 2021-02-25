@@ -1,5 +1,5 @@
 use anyhow::Result;
-use netkitten::{connect, listen, Options};
+use netkitten::{connect, listen, scan, Options};
 use structopt::StructOpt;
 
 fn main() -> Result<()> {
@@ -8,10 +8,6 @@ fn main() -> Result<()> {
     match opt {
         Options::Listen(listen_opts) => listen(&listen_opts),
         Options::Connect(connect_opts) => connect(&connect_opts),
-        Options::Scan(_scan_opts) => {
-            unimplemented!();
-        }
-    }?;
-
-    Ok(())
+        Options::Scan(scan_opts) => scan(&scan_opts),
+    }
 }

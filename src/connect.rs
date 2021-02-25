@@ -1,5 +1,5 @@
 use crate::transfer::tcp_cat;
-use std::io;
+use anyhow::{Context, Result};
 use std::net::TcpStream;
 use structopt::StructOpt;
 
@@ -13,9 +13,9 @@ pub struct ConnectOpts {
     port: u16,
 }
 
-pub fn connect(opt: &ConnectOpts) -> io::Result<()> {
+pub fn connect(opt: &ConnectOpts) -> Result<()> {
     let addr = format!("{}:{}", opt.host, opt.port);
     let stream = TcpStream::connect(addr)?;
 
-    tcp_cat(stream)
+    tcp_cat(stream).with_context(|| "failed to stream to/from socket")
 }
