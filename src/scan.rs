@@ -1,18 +1,31 @@
 use structopt::StructOpt;
 
 use anyhow::{anyhow, Context, Result};
+use std::iter::IntoIterator;
+use std::net::TcpStream;
 use std::str::FromStr;
 
 #[derive(StructOpt, Debug, Clone)]
 pub struct ScanOpts {
     host: String,
     port_range: PortRange,
+    #[structopt(short, long)]
+    verbose: bool,
 }
 
 #[derive(Debug, Clone)]
 struct PortRange {
     low_port: u16,
     high_port: Option<u16>,
+}
+
+impl IntoIterator for &PortRange {
+    type Item = u16;
+    type IntoIter = std::ops::RangeInclusive<u16>;
+    fn into_iter(self) -> Self::IntoIter {
+        let high_port = self.high_port.unwrap_or(self.low_port);
+        self.low_port..=high_port
+    }
 }
 
 /// Valid port ranges are two port numbers between 0 and 65536
@@ -59,7 +72,17 @@ impl FromStr for PortRange {
 }
 
 pub fn scan(opts: &ScanOpts) -> Result<()> {
-    println!("{:?}", opts.port_range);
+    for port in &opts.port_range {
+        let addr = format!("{}:{}", opts.host, port);
+
+        TcpStream::connect(addr)
+            .map(|_| println!("connected to {}:{}", opts.host, port))
+            .unwrap_or_else(|_| {
+                if opts.verbose {
+                    println!("failed to connect to {}:{}", opts.host, port)
+                }
+            });
+    }
 
     Ok(())
 }

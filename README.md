@@ -37,7 +37,7 @@ SUBCOMMANDS:
 
 ```
 
-#### Make an HTTP request 
+#### Make an HTTP request
 (You'll just have to settle with a redirect response, until TLS is implemented).
 
 ```
@@ -72,7 +72,8 @@ This is an early-stage project, but it aims to add many of the features of `netc
 * [x] Basic TCP client and server
 * [x] Concurrent listener
 * [x] Pipelining
-* [ ] Port Scanning
+* [x] Port Scanning
+* [ ] Service detection
 * [ ] TLS
 * [ ] UDP
 * [ ] Command execution
